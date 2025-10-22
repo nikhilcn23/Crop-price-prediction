@@ -392,10 +392,10 @@ Contributions are welcome! Please follow these steps:
 ## Screenshots
 
 ### Homepage
-![Homepage](screenshots/homepage.png)
+![Homepage](screenshots/Homepage.png)
 
 ### Prediction Result
-![Prediction Resultt](screenshots/prediction resultt.png)
+![Prediction Resultt](screenshots/predicted resultt.png)
 
 
 ## 👥 Authors
