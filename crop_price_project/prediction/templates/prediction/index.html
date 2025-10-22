@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crop Price Prediction</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .form-container {
+            padding: 40px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 1.05em;
+        }
+
+        .form-group select,
+        .form-group input[type="file"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .image-upload {
+            border: 3px dashed #e0e0e0;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .image-upload:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .image-upload i {
+            font-size: 3em;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .image-preview {
+            margin-top: 15px;
+            max-width: 200px;
+            display: none;
+            border-radius: 8px;
+        }
+
+        .btn-predict {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .btn-predict:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-predict:active {
+            transform: translateY(0);
+        }
+
+        .result-container {
+            display: none;
+            margin-top: 30px;
+            padding: 25px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border-radius: 12px;
+            color: white;
+        }
+
+        .result-container h2 {
+            font-size: 1.8em;
+            margin-bottom: 15px;
+        }
+
+        .price-display {
+            font-size: 3em;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        .result-details {
+            background: rgba(255,255,255,0.2);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .result-details p {
+            margin: 8px 0;
+            font-size: 1.1em;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌾 Crop Price Prediction</h1>
+            <p>Get accurate price predictions for your agricultural commodities</p>
+        </div>
+
+        <div class="form-container">
+            <form id="predictionForm" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label for="commodity">Select Commodity</label>
+                    <select id="commodity" name="commodity" required>
+                        <option value="">-- Choose Commodity --</option>
+                        {% for commodity in commodities %}
+                        <option value="{{ commodity }}">{{ commodity }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="state">Select State</label>
+                    <select id="state" name="state" required>
+                        <option value="">-- Choose State --</option>
+                        {% for state in states %}
+                        <option value="{{ state }}">{{ state }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="district">Select District</label>
+                    <select id="district" name="district" required>
+                        <option value="">-- First Select State --</option>
+                         {% for district in districts %}
+                        <option value="{{ district }}">{{ district }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="market">Select Market/Taluk</label>
+                    <select id="market" name="market" required>
+                        <option value="">-- First Select District --</option>
+                         {% for market in markets %}
+                        <option value="{{ market }}">{{ market }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Upload Commodity Image (Optional)</label>
+                    <div class="image-upload" onclick="document.getElementById('commodityImage').click()">
+                        <div>📷</div>
+                        <p>Click to upload or drag and drop</p>
+                        <small>PNG, JPG up to 5MB</small>
+                    </div>
+                    <input type="file" id="commodityImage" name="commodity_image" 
+                           accept="image/*" style="display: none;">
+                    <img id="imagePreview" class="image-preview" alt="Preview">
+                </div>
+
+                <button type="submit" class="btn-predict">Predict Price</button>
+            </form>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Calculating price prediction...</p>
+            </div>
+
+            <div class="result-container" id="resultContainer">
+                <h2>📊 Prediction Result</h2>
+                <div class="price-display">₹ <span id="predictedPrice">0</span></div>
+                <div class="result-details">
+                    <p><strong>Commodity:</strong> <span id="resultCommodity"></span></p>
+                    <p><strong>Location:</strong> <span id="resultLocation"></span></p>
+                    <p><strong>Market:</strong> <span id="resultMarket"></span></p>
+                    <p><strong>Date:</strong> <span id="resultDate"></span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Handle state change to load districts
+        document.getElementById('state').addEventListener('change', function() {
+            const state = this.value;
+            const districtSelect = document.getElementById('district');
+            
+            if (state) {
+                fetch(`/get-districts/?state=${state}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        districtSelect.innerHTML = '<option value="">-- Choose District --</option>';
+                        data.districts.forEach(district => {
+                            districtSelect.innerHTML += `<option value="${district}">${district}</option>`;
+                        });
+                    });
+            }
+        });
+
+        // Handle district change to load markets
+        document.getElementById('district').addEventListener('change', function() {
+            const district = this.value;
+            const marketSelect = document.getElementById('market');
+            
+            if (district) {
+                fetch(`/get-markets/?district=${district}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        marketSelect.innerHTML = '<option value="">-- Choose Market --</option>';
+                        data.markets.forEach(market => {
+                            marketSelect.innerHTML += `<option value="${market}">${market}</option>`;
+                        });
+                    });
+            }
+        });
+
+        // Handle image preview
+        document.getElementById('commodityImage').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('imagePreview');
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Handle form submission
+        document.getElementById('predictionForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const loading = document.getElementById('loading');
+            const resultContainer = document.getElementById('resultContainer');
+            
+            loading.style.display = 'block';
+            resultContainer.style.display = 'none';
+            
+            fetch('/predict/', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                loading.style.display = 'none';
+                
+                if (data.success) {
+                    document.getElementById('predictedPrice').textContent = data.predicted_price;
+                    document.getElementById('resultCommodity').textContent = data.commodity;
+                    document.getElementById('resultLocation').textContent = data.location;
+                    document.getElementById('resultMarket').textContent = data.market;
+                    document.getElementById('resultDate').textContent = data.date;
+                    resultContainer.style.display = 'block';
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                loading.style.display = 'none';
+                alert('An error occurred. Please try again.');
+                console.error('Error:', error);
+            });
+        });
+    </script>
+</body>
+</html>
